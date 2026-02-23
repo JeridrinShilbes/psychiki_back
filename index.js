@@ -27,7 +27,12 @@ const eventSchema = new mongoose.Schema({
   timestamps: true,
   // This ensures that when the doc is converted to JSON, 
   // we can handle the _id mapping easily if needed
-  toJSON: { virtuals: true },
+  toJSON: { virtuals: true,
+    transform: (doc, ret) => {
+      ret.id = ret._id; // Copy _id value to id
+      return ret;
+    }
+   },
   toObject: { virtuals: true }
 });
 
@@ -72,13 +77,41 @@ app.post('/api/events', async (req, res) => {
         res.status(400).json({ error: err.message });
     }
 });
+/**
+ * DELETE an event
+ * Checks if the requester is the author before deleting
+ */
+app.delete('/api/events/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const userName = req.headers['x-user-name']; 
+        console.log(userName);
 
-// Test routes
-app.get('/api/status', (req, res) => {
-    res.status(200).json({ status: 'success', message: 'Backend is awake' });
+        // 1. Find the event first
+        const event = await Event.findById(id);
+
+        if (!event) {
+            return res.status(404).json({ message: "Event not found" });
+        }
+
+        // 2. Check Ownership
+        // Compare the author stored in DB with the userName from the request
+        if (event.author !== userName) {
+            return res.status(403).json({ 
+                message: "Permission denied. You are not the author of this event." 
+            });
+        }
+
+        // 3. Delete the event
+        await Event.findByIdAndDelete(id);
+        
+        res.status(200).json({ message: "Event deleted successfully" });
+
+    } catch (err) {
+        console.error("Delete Error:", err);
+        res.status(500).json({ error: err.message });
+    }
 });
-
-// 5. Start Server
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
