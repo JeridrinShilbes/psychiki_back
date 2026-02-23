@@ -9,31 +9,34 @@ const mongoURI = process.env.MONGODB_URL;
 
 // 1. Database Connection
 mongoose.connect(mongoURI)
-  .then(() => console.log("MongoDB Connected..."))
-  .catch(err => console.error("MongoDB connection error:", err));
+    .then(() => console.log("MongoDB Connected..."))
+    .catch(err => console.error("MongoDB connection error:", err));
 
 // 2. Schema Definition - Updated to match Feed.tsx
 const eventSchema = new mongoose.Schema({
-  title: { type: String, required: true },
-  description: { type: String, required: true },
-  image: { type: String, default: 'https://images.unsplash.com/photo-1517836357463-d25dfe09ce14?auto=format&fit=crop&q=80&w=600' },
-  category: { type: String, required: true },
-  tags: [String],
-  members: { type: Number, default: 1 },
-  schedule: { type: String, default: 'TBD' },
-  matchScore: { type: Number, default: 100 },
-  author: { type: String, required: true } // Captured from user.name in Feed
-}, { 
-  timestamps: true,
-  // This ensures that when the doc is converted to JSON, 
-  // we can handle the _id mapping easily if needed
-  toJSON: { virtuals: true,
-    transform: (doc, ret) => {
-      ret.id = ret._id; // Copy _id value to id
-      return ret;
-    }
-   },
-  toObject: { virtuals: true }
+    title: { type: String, required: true },
+    description: { type: String, required: true },
+    image: { type: String, default: 'https://images.unsplash.com/photo-1517836357463-d25dfe09ce14?auto=format&fit=crop&q=80&w=600' },
+    category: { type: String, required: true },
+    tags: [String],
+    members: { type: Number, default: 1 },
+    schedule: { type: String, default: 'TBD' },
+    matchScore: { type: Number, default: 100 },
+    author: { type: String, required: true }, // Captured from user.name in Feed
+    lat: { type: Number },
+    lng: { type: Number }
+}, {
+    timestamps: true,
+    // This ensures that when the doc is converted to JSON, 
+    // we can handle the _id mapping easily if needed
+    toJSON: {
+        virtuals: true,
+        transform: (doc, ret) => {
+            ret.id = ret._id; // Copy _id value to id
+            return ret;
+        }
+    },
+    toObject: { virtuals: true }
 });
 
 const Event = mongoose.model('Event', eventSchema);
@@ -83,7 +86,7 @@ app.post('/api/events', async (req, res) => {
 app.delete('/api/events/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const userName = req.headers['x-user-name']; 
+        const userName = req.headers['x-user-name'];
         console.log(userName);
 
         // 1. Find the event first
@@ -96,14 +99,14 @@ app.delete('/api/events/:id', async (req, res) => {
         // 2. Check Ownership
         // Compare the author stored in DB with the userName from the request
         if (event.author !== userName && event.author !== "admin1") {
-            return res.status(403).json({ 
-                message: "Permission denied. You are not the author of this event." 
+            return res.status(403).json({
+                message: "Permission denied. You are not the author of this event."
             });
         }
 
         // 3. Delete the event
         await Event.findByIdAndDelete(id);
-        
+
         res.status(200).json({ message: "Event deleted successfully" });
 
     } catch (err) {
