@@ -115,7 +115,28 @@ app.delete('/api/events/:id', async (req, res) => {
     }
 });
 
-
+app.post('/api/events/:id/join', async (req, res) => {
+    try {
+        const eventId = req.params.id;
+        // Find the event by ID and increment the members count by 1
+        // `new: true` ensures the updated document is returned
+        const updatedEvent = await Event.findByIdAndUpdate(
+            eventId,
+            { $inc: { members: 1 } },
+            { new: true } 
+        );
+        if (!updatedEvent) {
+            return res.status(404).json({ message: "Event not found" });
+        }
+        res.status(200).json({ 
+            message: "Successfully joined event", 
+            event: updatedEvent 
+        });
+    } catch (error) {
+        console.error("Error joining event:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+});
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
