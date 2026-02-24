@@ -20,6 +20,7 @@ const eventSchema = new mongoose.Schema({
     category: { type: String, required: true },
     tags: [String],
     members: { type: Number, default: 1 },
+    joinedUsers: [String], // Array of usernames who have joined
     schedule: { type: String, default: 'TBD' },
     matchScore: { type: Number, default: 100 },
     author: { type: String, required: true }, // Captured from user.name in Feed
@@ -118,19 +119,46 @@ app.delete('/api/events/:id', async (req, res) => {
 app.post('/api/events/:id/join', async (req, res) => {
     try {
         const eventId = req.params.id;
-        // Find the event by ID and increment the members count by 1
+        const { userName } = req.body;
+        console.log(`\n--- JOIN REQUEST STARTED ---`);
+        console.log(`Event ID: ${eventId}, UserName Received: ${userName}`);
+
+        if (!userName) {
+            console.log("No userName provided. Rejecting.");
+            return res.status(400).json({ message: "UserName is required to join an event." });
+        }
+
+        // Find the event by ID
+        const event = await Event.findById(eventId);
+
+        if (!event) {
+            return res.status(404).json({ message: "Event not found" });
+        }
+
+        // Check if user has already joined
+        const joinedUsers = event.joinedUsers || [];
+        console.log(`Current joined users for event ${eventId}:`, joinedUsers);
+
+        if (joinedUsers.includes(userName)) {
+            console.log(`User ${userName} is already in the joined list.`);
+            return res.status(400).json({ message: "You have already joined this event." });
+        }
+
+        console.log(`User ${userName} not found in list. Updating database...`);
+        // increment the members count by 1 and add the user to joinedUsers
         // `new: true` ensures the updated document is returned
         const updatedEvent = await Event.findByIdAndUpdate(
             eventId,
-            { $inc: { members: 1 } },
-            { new: true } 
+            {
+                $inc: { members: 1 },
+                $push: { joinedUsers: userName }
+            },
+            { new: true }
         );
-        if (!updatedEvent) {
-            return res.status(404).json({ message: "Event not found" });
-        }
-        res.status(200).json({ 
-            message: "Successfully joined event", 
-            event: updatedEvent 
+
+        res.status(200).json({
+            message: "Successfully joined event",
+            event: updatedEvent
         });
     } catch (error) {
         console.error("Error joining event:", error);

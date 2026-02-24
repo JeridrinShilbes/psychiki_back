@@ -1,0 +1,74 @@
+[dotenv@17.3.1] injecting env (1) from .env -- tip: ⚙️  override existing env vars with { override: true }
+Server is running on port 3000
+MongoDB Connected...
+
+--- JOIN REQUEST STARTED ---
+Event ID: 699d01fcc37f73f71a4402de, UserName Received: testuser_1771906453767
+Current joined users for event 699d01fcc37f73f71a4402de: []
+User testuser_1771906453767 not found in list. Updating database...
+(node:8550) [MONGOOSE] Warning: mongoose: the `new` option for `findOneAndUpdate()` and `findOneAndReplace()` is deprecated. Use `returnDocument: 'after'` instead.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+--- JOIN REQUEST STARTED ---
+Event ID: 699d01fcc37f73f71a4402de, UserName Received: testuser_1771906453767
+Current joined users for event 699d01fcc37f73f71a4402de: [ 'testuser_1771906453767' ]
+User testuser_1771906453767 is already in the joined list.
+
+--- JOIN REQUEST STARTED ---
+Event ID: 699d01fcc37f73f71a4402de, UserName Received: testuser_1771906458866
+Current joined users for event 699d01fcc37f73f71a4402de: [ 'testuser_1771906453767' ]
+User testuser_1771906458866 not found in list. Updating database...
+(node:8550) [MONGOOSE] Warning: mongoose: the `new` option for `findOneAndUpdate()` and `findOneAndReplace()` is deprecated. Use `returnDocument: 'after'` instead.
+
+--- JOIN REQUEST STARTED ---
+Event ID: 699d01fcc37f73f71a4402de, UserName Received: testuser_1771906458866
+Current joined users for event 699d01fcc37f73f71a4402de: [ 'testuser_1771906453767', 'testuser_1771906458866' ]
+User testuser_1771906458866 is already in the joined list.
+
+--- JOIN REQUEST STARTED ---
+Event ID: 699ced012d13d8cb1cf07462, UserName Received: Jeridrin
+Current joined users for event 699ced012d13d8cb1cf07462: []
+User Jeridrin not found in list. Updating database...
+(node:8550) [MONGOOSE] Warning: mongoose: the `new` option for `findOneAndUpdate()` and `findOneAndReplace()` is deprecated. Use `returnDocument: 'after'` instead.
+
+--- JOIN REQUEST STARTED ---
+Event ID: 699cdd28e8681830ecf2a959, UserName Received: Jeridrin
+Current joined users for event 699cdd28e8681830ecf2a959: []
+User Jeridrin not found in list. Updating database...
+(node:8550) [MONGOOSE] Warning: mongoose: the `new` option for `findOneAndUpdate()` and `findOneAndReplace()` is deprecated. Use `returnDocument: 'after'` instead.
+
+--- JOIN REQUEST STARTED ---
+Event ID: 699ced012d13d8cb1cf07462, UserName Received: Hemonish
+Current joined users for event 699ced012d13d8cb1cf07462: [ 'Jeridrin' ]
+User Hemonish not found in list. Updating database...
+(node:8550) [MONGOOSE] Warning: mongoose: the `new` option for `findOneAndUpdate()` and `findOneAndReplace()` is deprecated. Use `returnDocument: 'after'` instead.
+
+--- JOIN REQUEST STARTED ---
+Event ID: 699ced012d13d8cb1cf07462, UserName Received: Lalith
+Current joined users for event 699ced012d13d8cb1cf07462: [ 'Jeridrin', 'Hemonish' ]
+User Lalith not found in list. Updating database...
+(node:8550) [MONGOOSE] Warning: mongoose: the `new` option for `findOneAndUpdate()` and `findOneAndReplace()` is deprecated. Use `returnDocument: 'after'` instead.
+
+--- JOIN REQUEST STARTED ---
+Event ID: 699ced012d13d8cb1cf07462, UserName Received: Francis
+Current joined users for event 699ced012d13d8cb1cf07462: [ 'Jeridrin', 'Hemonish', 'Lalith' ]
+User Francis not found in list. Updating database...
+(node:8550) [MONGOOSE] Warning: mongoose: the `new` option for `findOneAndUpdate()` and `findOneAndReplace()` is deprecated. Use `returnDocument: 'after'` instead.
+
+--- JOIN REQUEST STARTED ---
+Event ID: 699cdd28e8681830ecf2a959, UserName Received: Francis
+Current joined users for event 699cdd28e8681830ecf2a959: [ 'Jeridrin' ]
+User Francis not found in list. Updating database...
+(node:8550) [MONGOOSE] Warning: mongoose: the `new` option for `findOneAndUpdate()` and `findOneAndReplace()` is deprecated. Use `returnDocument: 'after'` instead.
+
+--- JOIN REQUEST STARTED ---
+Event ID: 699ce222e8681830ecf2a972, UserName Received: Lalith
+Current joined users for event 699ce222e8681830ecf2a972: []
+User Lalith not found in list. Updating database...
+(node:8550) [MONGOOSE] Warning: mongoose: the `new` option for `findOneAndUpdate()` and `findOneAndReplace()` is deprecated. Use `returnDocument: 'after'` instead.
+
+--- JOIN REQUEST STARTED ---
+Event ID: 699ce222e8681830ecf2a972, UserName Received: Snigdha
+Current joined users for event 699ce222e8681830ecf2a972: [ 'Lalith' ]
+User Snigdha not found in list. Updating database...
+(node:8550) [MONGOOSE] Warning: mongoose: the `new` option for `findOneAndUpdate()` and `findOneAndReplace()` is deprecated. Use `returnDocument: 'after'` instead.
