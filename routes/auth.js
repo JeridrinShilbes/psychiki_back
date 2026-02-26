@@ -1,3 +1,5 @@
+require('dns').setDefaultResultOrder('ipv4first');
+
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
@@ -6,50 +8,48 @@ const nodemailer = require('nodemailer');
 const User = require('../models/User');
 const auth = require('../middleware/auth');
 
-// Configure NodeMailer transporter
-// For production, you should use real SMTP credentials.
-// This is a test configuration that can use ethereal email or a real account.
 const transporter = nodemailer.createTransport({
-    service: 'gmail', // Standard service like Gmail, Sendinblue, Mailgun, etc.
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true, 
     auth: {
-        user: process.env.EMAIL_USER || 'your-email@gmail.com',
-        pass: process.env.EMAIL_PASS || 'your-email-app-password'
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
     }
 });
 
-// Helper to generate a 6 digit code
+transporter.verify(function (error, success) {
+    if (error) {
+        console.error(error);
+    } else {
+        console.log("ready");
+    }
+});
+
 const generateOTP = () => {
     return Math.floor(100000 + Math.random() * 900000).toString();
 };
 
-// @route   POST /api/auth/register
-// @desc    Register a user and send OTP
-// @access  Public
 router.post('/register', async (req, res) => {
     try {
         const { username, email, password } = req.body;
 
-        // Validation
         if (!username || !email || !password) {
             return res.status(400).json({ message: 'Please enter all fields' });
         }
 
-        // Check for existing user
         const existingUser = await User.findOne({ $or: [{ email }, { username }] });
         if (existingUser) {
-            // If user exists but is not verified, we can just resend OTP or let them know.
             if (!existingUser.isVerified) {
                 const newOtp = generateOTP();
                 existingUser.otp = newOtp;
-                existingUser.otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+                existingUser.otpExpires = new Date(Date.now() + 10 * 60 * 1000); 
 
-                // If they changing their password mid-way before verifying:
                 const salt = await bcrypt.genSalt(10);
                 existingUser.password = await bcrypt.hash(password, salt);
 
                 await existingUser.save();
 
-                // Send email
                 if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
                     await transporter.sendMail({
                         from: `"Psychiki" <${process.env.EMAIL_USER}>`,
@@ -67,25 +67,21 @@ router.post('/register', async (req, res) => {
             return res.status(400).json({ message: 'User already exists and is verified' });
         }
 
-        // Create new user
         const newUser = new User({
             username,
             email,
             password
         });
 
-        // Hash password
         const salt = await bcrypt.genSalt(10);
         newUser.password = await bcrypt.hash(password, salt);
 
-        // Generate OTP
         const otp = generateOTP();
         newUser.otp = otp;
-        newUser.otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+        newUser.otpExpires = new Date(Date.now() + 10 * 60 * 1000); 
 
         await newUser.save();
 
-        // Send Email
         if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
             await transporter.sendMail({
                 from: `"Psychiki" <${process.env.EMAIL_USER}>`,
@@ -109,9 +105,6 @@ router.post('/register', async (req, res) => {
     }
 });
 
-// @route   POST /api/auth/verify-otp
-// @desc    Verify OTP and return Token
-// @access  Public
 router.post('/verify-otp', async (req, res) => {
     try {
         const { email, otp } = req.body;
@@ -138,13 +131,11 @@ router.post('/verify-otp', async (req, res) => {
             return res.status(400).json({ message: 'Verification code has expired. Please register again to receive a new one.' });
         }
 
-        // Verification successful
         user.isVerified = true;
-        user.otp = undefined; // Clear OTP fields
+        user.otp = undefined; 
         user.otpExpires = undefined;
         await user.save();
 
-        // Generate final JWT
         const token = jwt.sign(
             { id: user._id, username: user.username },
             process.env.JWT_SECRET || 'fallback_secret_for_dev',
@@ -168,10 +159,6 @@ router.post('/verify-otp', async (req, res) => {
     }
 });
 
-
-// @route   POST /api/auth/login
-// @desc    Auth user & get token
-// @access  Public
 router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -180,21 +167,17 @@ router.post('/login', async (req, res) => {
             return res.status(400).json({ message: 'Please enter all fields' });
         }
 
-        // Check for user (by email)
         const user = await User.findOne({ email });
         if (!user) {
             return res.status(400).json({ message: 'Invalid credentials' });
         }
 
-        // Before allowing login, check if verified
         if (!user.isVerified) {
-            // Generate a fresh OTP
             const otp = generateOTP();
             user.otp = otp;
             user.otpExpires = new Date(Date.now() + 10 * 60 * 1000);
             await user.save();
 
-            // Resend Email
             if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
                 await transporter.sendMail({
                     from: `"Psychiki" <${process.env.EMAIL_USER}>`,
@@ -214,13 +197,11 @@ router.post('/login', async (req, res) => {
             });
         }
 
-        // Verify password
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             return res.status(400).json({ message: 'Invalid credentials' });
         }
 
-        // Create JWT
         const token = jwt.sign(
             { id: user._id, username: user.username },
             process.env.JWT_SECRET || 'fallback_secret_for_dev',
@@ -243,9 +224,6 @@ router.post('/login', async (req, res) => {
     }
 });
 
-// @route   GET /api/auth/me
-// @desc    Get user data
-// @access  Private
 router.get('/me', auth, async (req, res) => {
     try {
         const user = await User.findById(req.user.id).select('-password');
