@@ -46,6 +46,10 @@ app.use(cors()); // Simplified for typical Render usage
 app.use(express.json());
 
 // 4. Routes
+const authRoutes = require('./routes/auth');
+const auth = require('./middleware/auth');
+
+app.use('/api/auth', authRoutes);
 
 // Health Check
 app.get('/', (req, res) => {
@@ -70,9 +74,12 @@ app.get('/api/events', async (req, res) => {
 /** * POST a new event
  * Matches handleCreateEvent in Feed.tsx
  */
-app.post('/api/events', async (req, res) => {
+app.post('/api/events', auth, async (req, res) => {
     try {
-        const newEvent = new Event(req.body);
+        const newEvent = new Event({
+            ...req.body,
+            author: req.user.username
+        });
         const savedEvent = await newEvent.save();
         res.status(201).json(savedEvent);
     } catch (err) {
@@ -84,10 +91,10 @@ app.post('/api/events', async (req, res) => {
  * DELETE an event
  * Checks if the requester is the author before deleting
  */
-app.delete('/api/events/:id', async (req, res) => {
+app.delete('/api/events/:id', auth, async (req, res) => {
     try {
         const { id } = req.params;
-        const userName = req.headers['x-user-name'];
+        const userName = req.user.username;
         console.log(userName);
 
         // 1. Find the event first
@@ -116,16 +123,16 @@ app.delete('/api/events/:id', async (req, res) => {
     }
 });
 
-app.post('/api/events/:id/join', async (req, res) => {
+app.post('/api/events/:id/join', auth, async (req, res) => {
     try {
         const eventId = req.params.id;
-        const { userName } = req.body;
+        const userName = req.user.username;
         console.log(`\n--- JOIN REQUEST STARTED ---`);
-        console.log(`Event ID: ${eventId}, UserName Received: ${userName}`);
+        console.log(`Event ID: ${eventId}, UserName Resolved: ${userName}`);
 
         if (!userName) {
-            console.log("No userName provided. Rejecting.");
-            return res.status(400).json({ message: "UserName is required to join an event." });
+            console.log("No userName provided from token. Rejecting.");
+            return res.status(401).json({ message: "Authentication required to join an event." });
         }
 
         // Find the event by ID
