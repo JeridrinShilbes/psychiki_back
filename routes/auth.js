@@ -10,8 +10,8 @@ const auth = require('../middleware/auth');
 
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
-    port: 465,
-    secure: true, 
+    port: 587,
+    secure: false, // Use STARTTLS
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS
@@ -43,7 +43,7 @@ router.post('/register', async (req, res) => {
             if (!existingUser.isVerified) {
                 const newOtp = generateOTP();
                 existingUser.otp = newOtp;
-                existingUser.otpExpires = new Date(Date.now() + 10 * 60 * 1000); 
+                existingUser.otpExpires = new Date(Date.now() + 10 * 60 * 1000);
 
                 const salt = await bcrypt.genSalt(10);
                 existingUser.password = await bcrypt.hash(password, salt);
@@ -78,7 +78,7 @@ router.post('/register', async (req, res) => {
 
         const otp = generateOTP();
         newUser.otp = otp;
-        newUser.otpExpires = new Date(Date.now() + 10 * 60 * 1000); 
+        newUser.otpExpires = new Date(Date.now() + 10 * 60 * 1000);
 
         await newUser.save();
 
@@ -132,7 +132,7 @@ router.post('/verify-otp', async (req, res) => {
         }
 
         user.isVerified = true;
-        user.otp = undefined; 
+        user.otp = undefined;
         user.otpExpires = undefined;
         await user.save();
 
