@@ -19,7 +19,7 @@ const sendEmail = async (to, subject, otp) => {
                     'Authorization': `Bearer ${process.env.RESEND_API_KEY}`
                 },
                 body: JSON.stringify({
-                    from: 'Psychiki <onboarding@resend.dev>', // You can change 'onboarding' to anything like 'noreply'
+                    from: 'Psychiki <psychiki@psychiki.xyz>', 
                     to: [to],
                     subject: subject,
                     html: html,
