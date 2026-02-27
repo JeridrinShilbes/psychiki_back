@@ -8,7 +8,7 @@ const auth = (req, res, next) => {
             return res.status(401).json({ message: 'No authentication token, access denied' });
         }
 
-        const verified = jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret_for_dev');
+        const verified = jwt.verify(token, process.env.JWT_SECRET || 'dev_secret');
         req.user = verified;
         next();
     } catch (err) {
